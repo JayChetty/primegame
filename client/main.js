@@ -17,16 +17,20 @@ window.onload = function(){
   var helpeeModel = new Helpee({speed: 1, position:{x:100,y:200}, direction:Math.PI *(1/4)})
   var targetModel = new DisplayObject({speed: 1, position:{x:500,y:500}})
 
+  var hazardModel = new DisplayObject({speed: 1, position:{x:200,y:100}, hazard:true})
+
   //and sprites
   var heroTeamSprite = new PIXI.Sprite(horizontalTexture);
   var targetSprite = new PIXI.Sprite(blobTexture);
   var helpeeSprite = new PIXI.Sprite(blobTexture);
+  var hazardSprite = new PIXI.Sprite(horizontalTexture);
 
   //create views
   var spriteViews = [];//add additional object to this eg hazards
+  var hazardSpriteView = new SpriteView({ model:hazardModel, sprite:hazardSprite });
+  spriteViews.push(hazardSpriteView)
 
   var targetView = new SpriteView({ model:targetModel, sprite:targetSprite });
-  
   var heroTeamView = new SpriteView({ model:heroTeamModel, sprite:heroTeamSprite });
   var helpeeView = new SpriteView({ model:helpeeModel, sprite:helpeeSprite });
   //create stage

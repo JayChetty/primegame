@@ -6,6 +6,10 @@ var Helpee = MoveableDisplayObject.extend({
     direction:{
       type:'number',
       default: 0
+    },
+    stuck:{
+      type:'boolean',
+      default:false
     }
   },
 })

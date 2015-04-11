@@ -9,7 +9,15 @@ MoveableDisplayObject = DisplayObject.extend({
       type:'number',
       default: 1
     },
+    inHit:{
+      type:'boolean',
+      default:false
+    }
     
+  },
+
+  hasHit:function(otherObject){
+    return this.position.distanceTo(otherObject.position) < 15
   },
 
   moveInDirection:function(){

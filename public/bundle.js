@@ -30,16 +30,20 @@ window.onload = function(){
   var helpeeModel = new Helpee({speed: 1, position:{x:100,y:200}, direction:Math.PI *(1/4)})
   var targetModel = new DisplayObject({speed: 1, position:{x:500,y:500}})
 
+  var hazardModel = new DisplayObject({speed: 1, position:{x:200,y:100}, hazard:true})
+
   //and sprites
   var heroTeamSprite = new PIXI.Sprite(horizontalTexture);
   var targetSprite = new PIXI.Sprite(blobTexture);
   var helpeeSprite = new PIXI.Sprite(blobTexture);
+  var hazardSprite = new PIXI.Sprite(horizontalTexture);
 
   //create views
   var spriteViews = [];//add additional object to this eg hazards
+  var hazardSpriteView = new SpriteView({ model:hazardModel, sprite:hazardSprite });
+  spriteViews.push(hazardSpriteView)
 
   var targetView = new SpriteView({ model:targetModel, sprite:targetSprite });
-  
   var heroTeamView = new SpriteView({ model:heroTeamModel, sprite:heroTeamSprite });
   var helpeeView = new SpriteView({ model:helpeeModel, sprite:helpeeSprite });
   //create stage
@@ -64,6 +68,12 @@ window.onload = function(){
 State = require('ampersand-state');
 Position = require('./position');
 var DisplayObject = State.extend({
+  props:{
+    hazard:{
+      type:'boolean',
+      default:false
+    }
+  },
   children:{
     position:Position
   },
@@ -79,6 +89,10 @@ var Helpee = MoveableDisplayObject.extend({
     direction:{
       type:'number',
       default: 0
+    },
+    stuck:{
+      type:'boolean',
+      default:false
     }
   },
 })
@@ -120,7 +134,15 @@ MoveableDisplayObject = DisplayObject.extend({
       type:'number',
       default: 1
     },
+    inHit:{
+      type:'boolean',
+      default:false
+    }
     
+  },
+
+  hasHit:function(otherObject){
+    return this.position.distanceTo(otherObject.position) < 15
   },
 
   moveInDirection:function(){
@@ -5683,14 +5705,21 @@ StageView.prototype = {
   animate: function(){
     if (this.drawCount%1===0){
       this.checkComplete();
-      this.checkContact();
+      this.checkHelpeeContact();
+      this.checkHeroContact();
       this.updatePositions();
     }
     this.renderer.render(this.stage);
-    if(!this.complete){
+
+
+    if(!this.complete && !this.helpeeSpriteView.model.stuck){
       requestAnimationFrame(this.animate.bind(this));
     } else{
-      alert("Level Complete, good work")
+      if(this.complete){
+        alert("Level Complete, good work")
+      }else{
+        alert("Ah man, friend is in trouble")
+      }
     }
     
     this.drawCount++;
@@ -5705,20 +5734,49 @@ StageView.prototype = {
       this.complete = true;
     }
   },
-
-  checkContact:function(){
-    if(this.helpeeSpriteView.model.position.distanceTo(this.heroTeamSpriteView.model.position) < 15 && !this.heroTeamSpriteView.model.target){
-      if(!this.inHit){
-        this.inHit = true
-        if(this.heroTeamSpriteView.model.vertical){
-          this.helpeeSpriteView.model.direction = (Math.PI) - this.helpeeSpriteView.model.direction
-        } else{
-          this.helpeeSpriteView.model.direction = (Math.PI*2) - this.helpeeSpriteView.model.direction   
+  checkHeroContact:function(){
+    this.spriteViews.forEach(function(spriteView){
+      if(this.heroTeamSpriteView.model.hasHit(spriteView.model)){
+        if(!this.heroTeamSpriteView.model.inHit){
+          this.heroTeamSpriteView.model.inHit = true;
+          console.log('setting target to null')
+          this.heroTeamSpriteView.model.target = null
+        }else{
+          this.heroTeamSpriteView.model.inHit = false
         }
       }
-    }else{
-      this.inHit = false
-    }
+    },this)
+  },
+
+  checkHelpeeContact:function(){
+    var helpee = this.helpeeSpriteView.model;
+
+    var checkContact = function(obj){
+      if(helpee.hasHit(obj)){
+        if(!helpee.inHit){
+          helpee.inHit = true;
+          if(obj.hazard){
+            console.log('inhazaerd')
+            helpee.stuck = true;
+          }
+          if(obj.vertical){
+            this.helpeeSpriteView.model.direction = (Math.PI) - this.helpeeSpriteView.model.direction;
+          } else{
+            this.helpeeSpriteView.model.direction = (Math.PI*2) - this.helpeeSpriteView.model.direction;
+          }
+        }
+      }else{
+        helpee.inHit = false
+      }
+    }.bind(this)
+
+    checkContact(this.heroTeamSpriteView.model)
+
+    this.spriteViews.forEach(function(spriteView){
+      checkContact(spriteView.model)
+    },this)
+
+    
   }
 }
 

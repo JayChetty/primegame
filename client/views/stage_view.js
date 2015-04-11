@@ -59,14 +59,21 @@ StageView.prototype = {
   animate: function(){
     if (this.drawCount%1===0){
       this.checkComplete();
-      this.checkContact();
+      this.checkHelpeeContact();
+      this.checkHeroContact();
       this.updatePositions();
     }
     this.renderer.render(this.stage);
-    if(!this.complete){
+
+
+    if(!this.complete && !this.helpeeSpriteView.model.stuck){
       requestAnimationFrame(this.animate.bind(this));
     } else{
-      alert("Level Complete, good work")
+      if(this.complete){
+        alert("Level Complete, good work")
+      }else{
+        alert("Ah man, friend is in trouble")
+      }
     }
     
     this.drawCount++;
@@ -81,20 +88,49 @@ StageView.prototype = {
       this.complete = true;
     }
   },
-
-  checkContact:function(){
-    if(this.helpeeSpriteView.model.position.distanceTo(this.heroTeamSpriteView.model.position) < 15 && !this.heroTeamSpriteView.model.target){
-      if(!this.inHit){
-        this.inHit = true
-        if(this.heroTeamSpriteView.model.vertical){
-          this.helpeeSpriteView.model.direction = (Math.PI) - this.helpeeSpriteView.model.direction
-        } else{
-          this.helpeeSpriteView.model.direction = (Math.PI*2) - this.helpeeSpriteView.model.direction   
+  checkHeroContact:function(){
+    this.spriteViews.forEach(function(spriteView){
+      if(this.heroTeamSpriteView.model.hasHit(spriteView.model)){
+        if(!this.heroTeamSpriteView.model.inHit){
+          this.heroTeamSpriteView.model.inHit = true;
+          console.log('setting target to null')
+          this.heroTeamSpriteView.model.target = null
+        }else{
+          this.heroTeamSpriteView.model.inHit = false
         }
       }
-    }else{
-      this.inHit = false
-    }
+    },this)
+  },
+
+  checkHelpeeContact:function(){
+    var helpee = this.helpeeSpriteView.model;
+
+    var checkContact = function(obj){
+      if(helpee.hasHit(obj)){
+        if(!helpee.inHit){
+          helpee.inHit = true;
+          if(obj.hazard){
+            console.log('inhazaerd')
+            helpee.stuck = true;
+          }
+          if(obj.vertical){
+            this.helpeeSpriteView.model.direction = (Math.PI) - this.helpeeSpriteView.model.direction;
+          } else{
+            this.helpeeSpriteView.model.direction = (Math.PI*2) - this.helpeeSpriteView.model.direction;
+          }
+        }
+      }else{
+        helpee.inHit = false
+      }
+    }.bind(this)
+
+    checkContact(this.heroTeamSpriteView.model)
+
+    this.spriteViews.forEach(function(spriteView){
+      checkContact(spriteView.model)
+    },this)
+
+    
   }
 }
 
