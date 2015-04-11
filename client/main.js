@@ -13,7 +13,7 @@ window.onload = function(){
   
   //set up models
   var heroTeamModel = new HeroTeam({speed: 1})
-  var helpeeModel = new Helpee({speed: 1, position:{x:100,y:200}})
+  var helpeeModel = new Helpee({speed: 1, position:{x:100,y:200}, direction:Math.PI *(1/4)})
   var wallModel = new DisplayObject({speed: 1, position:{x:100,y:100}})
 
   //and sprites

@@ -10,6 +10,14 @@ var StageView = function(spec){
   //set up heroteam
   this.heroTeamSpriteView = spec.heroTeamSpriteView;
   this.stage.addChild(this.heroTeamSpriteView.sprite);
+
+  //clicks change position
+  this.heroTeamSpriteView.sprite.interactive = true;
+  this.heroTeamSpriteView.sprite.mouseup = function(data){
+    this.heroTeamSpriteView.model.vertical = !this.heroTeamSpriteView.model.vertical
+  }.bind(this)
+
+  //go to clicks on stage
   this.stage.mousedown = function(data){
     this.heroTeamSpriteView.model.target = { position: { x:data.global.x, y:data.global.y }}
   }.bind(this)
@@ -35,6 +43,7 @@ var StageView = function(spec){
 StageView.prototype = {
   animate: function(){
     if (this.drawCount%1===0){
+      this.checkContact();
       this.updatePositions();
     }
     this.renderer.render(this.stage);
@@ -45,6 +54,16 @@ StageView.prototype = {
     this.heroTeamSpriteView.model.moveTowardsTarget();
     this.helpeeSpriteView.model.moveInDirection();
   },
+
+  checkContact:function(){
+    if(this.helpeeSpriteView.model.position.distanceTo(this.heroTeamSpriteView.model.position) < 10){
+      if(this.heroTeamSpriteView.model.vertical){
+        this.helpeeSpriteView.model.direction = (Math.PI) - this.helpeeSpriteView.model.direction
+      } else{
+        this.helpeeSpriteView.model.direction = (Math.PI*2) - this.helpeeSpriteView.model.direction   
+      }
+    }
+  }
 }
 
 module.exports = StageView;
