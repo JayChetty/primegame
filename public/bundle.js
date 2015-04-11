@@ -23,6 +23,7 @@ window.onload = function(){
 	// You can use either PIXI.WebGLRenderer or PIXI.CanvasRenderer
 	var renderer = new PIXI.WebGLRenderer(800, 600);
   var blobTexture = PIXI.Texture.fromImage("blob2.png");
+  var horizontalTexture = PIXI.Texture.fromImage("horizontal.png");
   
   //set up models
   var heroTeamModel = new HeroTeam({speed: 1})
@@ -30,7 +31,7 @@ window.onload = function(){
   var targetModel = new DisplayObject({speed: 1, position:{x:500,y:500}})
 
   //and sprites
-  var heroTeamSprite = new PIXI.Sprite(blobTexture);
+  var heroTeamSprite = new PIXI.Sprite(horizontalTexture);
   var targetSprite = new PIXI.Sprite(blobTexture);
   var helpeeSprite = new PIXI.Sprite(blobTexture);
 
@@ -5625,11 +5626,14 @@ module.exports = SpriteView
 var SpriteView = require('./sprite_view')
 
 var StageView = function(spec){
+  var horizontalTexture = PIXI.Texture.fromImage("horizontal.png");
+  var verticalTexture = PIXI.Texture.fromImage("vertical.png");
   //set up stage
   this.drawCount = 0
   this.complete = false;
   this.stage = spec.stage;
   this.renderer = spec.renderer;
+  this.inHit = false;
 
   //set up heroteam
   this.heroTeamSpriteView = spec.heroTeamSpriteView;
@@ -5639,6 +5643,12 @@ var StageView = function(spec){
   this.heroTeamSpriteView.sprite.interactive = true;
   this.heroTeamSpriteView.sprite.mouseup = function(data){
     this.heroTeamSpriteView.model.vertical = !this.heroTeamSpriteView.model.vertical
+    // this shouldnt be in here should be handled by view or even sprite
+    if(this.heroTeamSpriteView.model.vertical){
+      this.heroTeamSpriteView.sprite.setTexture(verticalTexture);
+    }else{
+      this.heroTeamSpriteView.sprite.setTexture(horizontalTexture);
+    }
   }.bind(this)
 
   //go to clicks on stage
@@ -5666,6 +5676,7 @@ var StageView = function(spec){
 
   //start animation
   requestAnimationFrame(this.animate.bind(this));
+
 }
 
 StageView.prototype = {
@@ -5690,18 +5701,23 @@ StageView.prototype = {
   },
 
   checkComplete:function(){
-    if(this.helpeeSpriteView.model.position.distanceTo(this.targetSpriteView.model.position) < 10){
+    if(this.helpeeSpriteView.model.position.distanceTo(this.targetSpriteView.model.position) < 15){
       this.complete = true;
     }
   },
 
   checkContact:function(){
-    if(this.helpeeSpriteView.model.position.distanceTo(this.heroTeamSpriteView.model.position) < 10){
-      if(this.heroTeamSpriteView.model.vertical){
-        this.helpeeSpriteView.model.direction = (Math.PI) - this.helpeeSpriteView.model.direction
-      } else{
-        this.helpeeSpriteView.model.direction = (Math.PI*2) - this.helpeeSpriteView.model.direction   
+    if(this.helpeeSpriteView.model.position.distanceTo(this.heroTeamSpriteView.model.position) < 15 && !this.heroTeamSpriteView.model.target){
+      if(!this.inHit){
+        this.inHit = true
+        if(this.heroTeamSpriteView.model.vertical){
+          this.helpeeSpriteView.model.direction = (Math.PI) - this.helpeeSpriteView.model.direction
+        } else{
+          this.helpeeSpriteView.model.direction = (Math.PI*2) - this.helpeeSpriteView.model.direction   
+        }
       }
+    }else{
+      this.inHit = false
     }
   }
 }

@@ -10,6 +10,7 @@ window.onload = function(){
 	// You can use either PIXI.WebGLRenderer or PIXI.CanvasRenderer
 	var renderer = new PIXI.WebGLRenderer(800, 600);
   var blobTexture = PIXI.Texture.fromImage("blob2.png");
+  var horizontalTexture = PIXI.Texture.fromImage("horizontal.png");
   
   //set up models
   var heroTeamModel = new HeroTeam({speed: 1})
@@ -17,7 +18,7 @@ window.onload = function(){
   var targetModel = new DisplayObject({speed: 1, position:{x:500,y:500}})
 
   //and sprites
-  var heroTeamSprite = new PIXI.Sprite(blobTexture);
+  var heroTeamSprite = new PIXI.Sprite(horizontalTexture);
   var targetSprite = new PIXI.Sprite(blobTexture);
   var helpeeSprite = new PIXI.Sprite(blobTexture);
 
