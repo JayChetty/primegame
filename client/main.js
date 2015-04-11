@@ -14,17 +14,18 @@ window.onload = function(){
   //set up models
   var heroTeamModel = new HeroTeam({speed: 1})
   var helpeeModel = new Helpee({speed: 1, position:{x:100,y:200}, direction:Math.PI *(1/4)})
-  var wallModel = new DisplayObject({speed: 1, position:{x:100,y:100}})
+  var targetModel = new DisplayObject({speed: 1, position:{x:500,y:500}})
 
   //and sprites
   var heroTeamSprite = new PIXI.Sprite(blobTexture);
-  var wallSprite = new PIXI.Sprite(blobTexture);
+  var targetSprite = new PIXI.Sprite(blobTexture);
   var helpeeSprite = new PIXI.Sprite(blobTexture);
 
   //create views
-  var spriteViews = [];
-  var wallView = new SpriteView({ model:wallModel, sprite:wallSprite });
-  spriteViews.push(wallView);
+  var spriteViews = [];//add additional object to this eg hazards
+
+  var targetView = new SpriteView({ model:targetModel, sprite:targetSprite });
+  
   var heroTeamView = new SpriteView({ model:heroTeamModel, sprite:heroTeamSprite });
   var helpeeView = new SpriteView({ model:helpeeModel, sprite:helpeeSprite });
   //create stage
@@ -37,7 +38,8 @@ window.onload = function(){
     heroTeamSpriteView: heroTeamView,
     stage: stage,
     spriteViews:spriteViews,
-    helpeeSpriteView: helpeeView
+    helpeeSpriteView: helpeeView,
+    targetSpriteView:targetView
   })
 
 	document.body.appendChild(stageView.renderer.view);

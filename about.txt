@@ -1,0 +1,23 @@
+get helpee to save position avoiding obstacles
+
+allocate a number a heros. Put into teams.
+
+hero teams can break down into their prime parts with various
+abilities.
+
+Challenge:
+Initial Setup - strategy
+Play- timing etc
+
+2:wall -vertical -horizontal (have an angle)
+3:bridge
+5:slower
+7:fighter?
+11:catapault?
+13:
+17:
+19:
+23:
+27:
+29:
+31:

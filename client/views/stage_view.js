@@ -4,6 +4,7 @@ var SpriteView = require('./sprite_view')
 var StageView = function(spec){
   //set up stage
   this.drawCount = 0
+  this.complete = false;
   this.stage = spec.stage;
   this.renderer = spec.renderer;
 
@@ -26,7 +27,11 @@ var StageView = function(spec){
   this.helpeeSpriteView = spec.helpeeSpriteView;
   this.stage.addChild(this.helpeeSpriteView.sprite);
 
-  //add other objects
+  //setup target
+  this.targetSpriteView = spec.targetSpriteView;
+  this.stage.addChild(this.targetSpriteView.sprite);
+
+  //add other objects(hazards etc)
   this.spriteViews = spec.spriteViews;
   this.spriteViews.forEach(function(spriteView){
     this.stage.addChild(spriteView.sprite);
@@ -43,16 +48,28 @@ var StageView = function(spec){
 StageView.prototype = {
   animate: function(){
     if (this.drawCount%1===0){
+      this.checkComplete();
       this.checkContact();
       this.updatePositions();
     }
     this.renderer.render(this.stage);
-    requestAnimationFrame(this.animate.bind(this));
+    if(!this.complete){
+      requestAnimationFrame(this.animate.bind(this));
+    } else{
+      alert("Level Complete, good work")
+    }
+    
     this.drawCount++;
   },
   updatePositions:function(){
     this.heroTeamSpriteView.model.moveTowardsTarget();
     this.helpeeSpriteView.model.moveInDirection();
+  },
+
+  checkComplete:function(){
+    if(this.helpeeSpriteView.model.position.distanceTo(this.targetSpriteView.model.position) < 10){
+      this.complete = true;
+    }
   },
 
   checkContact:function(){
