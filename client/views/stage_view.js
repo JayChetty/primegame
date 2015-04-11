@@ -7,22 +7,23 @@ var StageView = function(spec){
   this.stage = spec.stage;
   this.renderer = spec.renderer;
 
-  //set up hero
+  //set up heroteam
   this.heroTeamSpriteView = spec.heroTeamSpriteView;
-  this.heroTeamModel = this.heroTeamSpriteView.model
-  this.spriteViews = spec.spriteViews;
   this.stage.addChild(this.heroTeamSpriteView.sprite);
   this.stage.mousedown = function(data){
     this.heroTeamSpriteView.model.target = { position: { x:data.global.x, y:data.global.y }}
   }.bind(this)
 
+  //set up helpee
+  this.helpeeSpriteView = spec.helpeeSpriteView;
+  this.stage.addChild(this.helpeeSpriteView.sprite);
+
   //add other objects
+  this.spriteViews = spec.spriteViews;
   this.spriteViews.forEach(function(spriteView){
-    console.log('spriteView', spriteView)
     this.stage.addChild(spriteView.sprite);
     spriteView.sprite.interactive = true;
     spriteView.sprite.mouseup = function(data){
-      console.log('data', data);
       this.stageView.heroTeamSpriteView.model.target = this.target.model
     }.bind({stageView:this, target:spriteView})
   },this)
@@ -34,14 +35,15 @@ var StageView = function(spec){
 StageView.prototype = {
   animate: function(){
     if (this.drawCount%1===0){
-      this.updateHeroPosition();
+      this.updatePositions();
     }
     this.renderer.render(this.stage);
     requestAnimationFrame(this.animate.bind(this));
     this.drawCount++;
   },
-  updateHeroPosition:function(){
+  updatePositions:function(){
     this.heroTeamSpriteView.model.moveTowardsTarget();
+    this.helpeeSpriteView.model.moveInDirection();
   },
 }
 

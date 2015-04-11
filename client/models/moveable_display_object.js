@@ -12,6 +12,15 @@ MoveableDisplayObject = DisplayObject.extend({
     
   },
 
+  moveInDirection:function(){
+    if(this.direction===null || this.direction === undefined){ return }
+
+    var change = math.polarToCartesian(this.speed,this.direction);
+    console.log('change', change)
+    this.position.x = this.position.x + change.x;
+    this.position.y = this.position.y + change.y;
+  },
+
   moveTowardsPosition:function(targetPosition){
     var pixelsPerMove = this.speed * 5;
     var diffX = this.position.xDifference(targetPosition);

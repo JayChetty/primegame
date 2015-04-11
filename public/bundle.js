@@ -2,12 +2,19 @@
 module.exports = {
   sign: function(x){ 
     return x > 0 ? 1 : x < 0 ? -1 : 0; 
+  },
+
+  polarToCartesian:function(magnitude, angle){
+    x = magnitude * Math.cos(angle);
+    y = magnitude * Math.sin(angle);
+    return {x:x,y:y}
   }
 }
 },{}],"/home/jay/Programming/JSProjects/primegame/client/main.js":[function(require,module,exports){
 var StageView = require('./views/stage_view');
 var DisplayObject = require('./models/display_object');
-var HeroTeam = require('./models/hero_team')
+var HeroTeam = require('./models/hero_team');
+var Helpee = require('./models/helpee')
 var SpriteView = require('./views/sprite_view');
 var app = require('ampersand-app');
 
@@ -19,18 +26,20 @@ window.onload = function(){
   
   //set up models
   var heroTeamModel = new HeroTeam({speed: 1})
+  var helpeeModel = new Helpee({speed: 1, position:{x:100,y:200}})
   var wallModel = new DisplayObject({speed: 1, position:{x:100,y:100}})
 
   //and sprites
   var heroTeamSprite = new PIXI.Sprite(blobTexture);
   var wallSprite = new PIXI.Sprite(blobTexture);
+  var helpeeSprite = new PIXI.Sprite(blobTexture);
 
   //create views
   var spriteViews = [];
   var wallView = new SpriteView({ model:wallModel, sprite:wallSprite });
   spriteViews.push(wallView);
   var heroTeamView = new SpriteView({ model:heroTeamModel, sprite:heroTeamSprite });
-
+  var helpeeView = new SpriteView({ model:helpeeModel, sprite:helpeeSprite });
   //create stage
   var interactive = true;
   var stage = new PIXI.Stage(0x66FF99, interactive);
@@ -41,13 +50,14 @@ window.onload = function(){
     heroTeamSpriteView: heroTeamView,
     stage: stage,
     spriteViews:spriteViews,
+    helpeeSpriteView: helpeeView
   })
 
 	document.body.appendChild(stageView.renderer.view);
 }
 
 
-},{"./models/display_object":"/home/jay/Programming/JSProjects/primegame/client/models/display_object.js","./models/hero_team":"/home/jay/Programming/JSProjects/primegame/client/models/hero_team.js","./views/sprite_view":"/home/jay/Programming/JSProjects/primegame/client/views/sprite_view.js","./views/stage_view":"/home/jay/Programming/JSProjects/primegame/client/views/stage_view.js","ampersand-app":"/home/jay/Programming/JSProjects/primegame/client/node_modules/ampersand-app/ampersand-app.js"}],"/home/jay/Programming/JSProjects/primegame/client/models/display_object.js":[function(require,module,exports){
+},{"./models/display_object":"/home/jay/Programming/JSProjects/primegame/client/models/display_object.js","./models/helpee":"/home/jay/Programming/JSProjects/primegame/client/models/helpee.js","./models/hero_team":"/home/jay/Programming/JSProjects/primegame/client/models/hero_team.js","./views/sprite_view":"/home/jay/Programming/JSProjects/primegame/client/views/sprite_view.js","./views/stage_view":"/home/jay/Programming/JSProjects/primegame/client/views/stage_view.js","ampersand-app":"/home/jay/Programming/JSProjects/primegame/client/node_modules/ampersand-app/ampersand-app.js"}],"/home/jay/Programming/JSProjects/primegame/client/models/display_object.js":[function(require,module,exports){
 State = require('ampersand-state');
 Position = require('./position');
 var DisplayObject = State.extend({
@@ -57,7 +67,21 @@ var DisplayObject = State.extend({
 })
 
 module.exports = DisplayObject
-},{"./position":"/home/jay/Programming/JSProjects/primegame/client/models/position.js","ampersand-state":"/home/jay/Programming/JSProjects/primegame/client/node_modules/ampersand-state/ampersand-state.js"}],"/home/jay/Programming/JSProjects/primegame/client/models/hero_team.js":[function(require,module,exports){
+},{"./position":"/home/jay/Programming/JSProjects/primegame/client/models/position.js","ampersand-state":"/home/jay/Programming/JSProjects/primegame/client/node_modules/ampersand-state/ampersand-state.js"}],"/home/jay/Programming/JSProjects/primegame/client/models/helpee.js":[function(require,module,exports){
+MoveableDisplayObject = require('./moveable_display_object');
+
+var app = require('ampersand-app');
+var Helpee = MoveableDisplayObject.extend({
+  props: {
+    direction:{
+      type:'number',
+      default: 0
+    }
+  },
+})
+
+module.exports = Helpee
+},{"./moveable_display_object":"/home/jay/Programming/JSProjects/primegame/client/models/moveable_display_object.js","ampersand-app":"/home/jay/Programming/JSProjects/primegame/client/node_modules/ampersand-app/ampersand-app.js"}],"/home/jay/Programming/JSProjects/primegame/client/models/hero_team.js":[function(require,module,exports){
 MoveableDisplayObject = require('./moveable_display_object');
 
 var app = require('ampersand-app');
@@ -93,6 +117,15 @@ MoveableDisplayObject = DisplayObject.extend({
       default: 1
     },
     
+  },
+
+  moveInDirection:function(){
+    if(this.direction===null || this.direction === undefined){ return }
+
+    var change = math.polarToCartesian(this.speed,this.direction);
+    console.log('change', change)
+    this.position.x = this.position.x + change.x;
+    this.position.y = this.position.y + change.y;
   },
 
   moveTowardsPosition:function(targetPosition){
@@ -5596,22 +5629,23 @@ var StageView = function(spec){
   this.stage = spec.stage;
   this.renderer = spec.renderer;
 
-  //set up hero
+  //set up heroteam
   this.heroTeamSpriteView = spec.heroTeamSpriteView;
-  this.heroTeamModel = this.heroTeamSpriteView.model
-  this.spriteViews = spec.spriteViews;
   this.stage.addChild(this.heroTeamSpriteView.sprite);
   this.stage.mousedown = function(data){
     this.heroTeamSpriteView.model.target = { position: { x:data.global.x, y:data.global.y }}
   }.bind(this)
 
+  //set up helpee
+  this.helpeeSpriteView = spec.helpeeSpriteView;
+  this.stage.addChild(this.helpeeSpriteView.sprite);
+
   //add other objects
+  this.spriteViews = spec.spriteViews;
   this.spriteViews.forEach(function(spriteView){
-    console.log('spriteView', spriteView)
     this.stage.addChild(spriteView.sprite);
     spriteView.sprite.interactive = true;
     spriteView.sprite.mouseup = function(data){
-      console.log('data', data);
       this.stageView.heroTeamSpriteView.model.target = this.target.model
     }.bind({stageView:this, target:spriteView})
   },this)
@@ -5623,14 +5657,15 @@ var StageView = function(spec){
 StageView.prototype = {
   animate: function(){
     if (this.drawCount%1===0){
-      this.updateHeroPosition();
+      this.updatePositions();
     }
     this.renderer.render(this.stage);
     requestAnimationFrame(this.animate.bind(this));
     this.drawCount++;
   },
-  updateHeroPosition:function(){
+  updatePositions:function(){
     this.heroTeamSpriteView.model.moveTowardsTarget();
+    this.helpeeSpriteView.model.moveInDirection();
   },
 }
 
