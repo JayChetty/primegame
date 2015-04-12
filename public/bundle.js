@@ -99,13 +99,29 @@ var Helpee = MoveableDisplayObject.extend({
 
 module.exports = Helpee
 },{"./moveable_display_object":"/home/jay/Programming/JSProjects/primegame/client/models/moveable_display_object.js","ampersand-app":"/home/jay/Programming/JSProjects/primegame/client/node_modules/ampersand-app/ampersand-app.js"}],"/home/jay/Programming/JSProjects/primegame/client/models/hero_team.js":[function(require,module,exports){
-MoveableDisplayObject = require('./moveable_display_object');
+var MoveableDisplayObject = require('./moveable_display_object');
+var primes = require('./primes')
 
 var app = require('ampersand-app');
 var HeroTeam = MoveableDisplayObject.extend({
   props: {
     target:'object',
-    vertical:'boolean'
+    vertical:'boolean',
+    size:{
+      type:'number',
+      default:2
+    },
+    groupSize:'number',
+    numGroups:'number',
+  },
+  initialize:function(){
+    var defaultGrouplayout = this.groupOptions()
+    this.setGroupLayout(0);
+  },
+  setGroupLayout:function(index){
+    var groupLayout = this.groupOptions()[index];
+    this.groupSize = groupLayout.sizeGroup;
+    this.numGroups = groupLayout.numGroups;
   },
   moveTowardsTarget:function(){
     if(this.target && this.target.position){
@@ -118,11 +134,28 @@ var HeroTeam = MoveableDisplayObject.extend({
   arrivedAtTarget:function(){
     app.trigger('display-target', this.target)
     this.target = null;
+  },
+
+  groupOptions: function(){
+    var primeIndex  = primes.indexOf(this.size)
+    var isPrime = primeIndex > -1;
+    if(isPrime){//quick exit if prime
+      return [ { numGroups:1, sizeGroup:this.size } ];
+    }
+
+    var primeFactors = primes.filter(function(prime){
+      return this.size%prime == 0;
+    }, this)
+
+    return primeFactors.map(function(primeFactor){
+      return {numGroups:(this.size/primeFactor),sizeGroup:primeFactor}
+    }, this)
+
   }
 })
 
 module.exports = HeroTeam
-},{"./moveable_display_object":"/home/jay/Programming/JSProjects/primegame/client/models/moveable_display_object.js","ampersand-app":"/home/jay/Programming/JSProjects/primegame/client/node_modules/ampersand-app/ampersand-app.js"}],"/home/jay/Programming/JSProjects/primegame/client/models/moveable_display_object.js":[function(require,module,exports){
+},{"./moveable_display_object":"/home/jay/Programming/JSProjects/primegame/client/models/moveable_display_object.js","./primes":"/home/jay/Programming/JSProjects/primegame/client/models/primes.js","ampersand-app":"/home/jay/Programming/JSProjects/primegame/client/node_modules/ampersand-app/ampersand-app.js"}],"/home/jay/Programming/JSProjects/primegame/client/models/moveable_display_object.js":[function(require,module,exports){
 State = require('ampersand-state');
 DisplayObject = require('./display_object');
 math = require('../lib/math')
@@ -218,7 +251,11 @@ var Position = State.extend({
 })
 
 module.exports = Position
-},{"ampersand-state":"/home/jay/Programming/JSProjects/primegame/client/node_modules/ampersand-state/ampersand-state.js"}],"/home/jay/Programming/JSProjects/primegame/client/node_modules/ampersand-app/ampersand-app.js":[function(require,module,exports){
+},{"ampersand-state":"/home/jay/Programming/JSProjects/primegame/client/node_modules/ampersand-state/ampersand-state.js"}],"/home/jay/Programming/JSProjects/primegame/client/models/primes.js":[function(require,module,exports){
+var primes = [2,3 ,5 ,7 ,11 ,13 ,17 ,19 ,23 ,29 ,31 ,37 ,41 ,43 ,47 ,53 ,59 ,61 ,67 ,71 ,73 ,79 ,83 ,89 ,97,101,103,107,109,113 ,127,131,137,139,149,151,157,163,167,173,179,181,191,193,197,199]
+
+module.exports = primes
+},{}],"/home/jay/Programming/JSProjects/primegame/client/node_modules/ampersand-app/ampersand-app.js":[function(require,module,exports){
 ;if (typeof window !== "undefined") {  window.ampersand = window.ampersand || {};  window.ampersand["ampersand-app"] = window.ampersand["ampersand-app"] || [];  window.ampersand["ampersand-app"].push("1.0.3");}
 var Events = require('ampersand-events');
 var toArray = require('amp-to-array');
