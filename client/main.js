@@ -1,5 +1,6 @@
 var StageView = require('./views/stage_view');
 var DisplayObject = require('./models/display_object');
+var Hazard = require('./models/hazard');
 var HeroTeam = require('./models/hero_team');
 var Helpee = require('./models/helpee')
 var SpriteView = require('./views/sprite_view');
@@ -17,7 +18,7 @@ window.onload = function(){
   var helpeeModel = new Helpee({speed: 1, position:{x:100,y:200}, direction:Math.PI *(1/4)})
   var targetModel = new DisplayObject({speed: 1, position:{x:500,y:500}})
 
-  var hazardModel = new DisplayObject({speed: 1, position:{x:200,y:100}, hazard:true})
+  var hazardModel = new Hazard({speed: 1, position:{x:200,y:100}, protectorPrimes:[2]})
 
   //and sprites
   var heroTeamSprite = new PIXI.Sprite(horizontalTexture);

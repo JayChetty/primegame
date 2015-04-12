@@ -13,6 +13,7 @@ module.exports = {
 },{}],"/home/jay/Programming/JSProjects/primegame/client/main.js":[function(require,module,exports){
 var StageView = require('./views/stage_view');
 var DisplayObject = require('./models/display_object');
+var Hazard = require('./models/hazard');
 var HeroTeam = require('./models/hero_team');
 var Helpee = require('./models/helpee')
 var SpriteView = require('./views/sprite_view');
@@ -30,7 +31,7 @@ window.onload = function(){
   var helpeeModel = new Helpee({speed: 1, position:{x:100,y:200}, direction:Math.PI *(1/4)})
   var targetModel = new DisplayObject({speed: 1, position:{x:500,y:500}})
 
-  var hazardModel = new DisplayObject({speed: 1, position:{x:200,y:100}, hazard:true})
+  var hazardModel = new Hazard({speed: 1, position:{x:200,y:100}, protectorPrimes:[2]})
 
   //and sprites
   var heroTeamSprite = new PIXI.Sprite(horizontalTexture);
@@ -64,23 +65,37 @@ window.onload = function(){
 }
 
 
-},{"./models/display_object":"/home/jay/Programming/JSProjects/primegame/client/models/display_object.js","./models/helpee":"/home/jay/Programming/JSProjects/primegame/client/models/helpee.js","./models/hero_team":"/home/jay/Programming/JSProjects/primegame/client/models/hero_team.js","./views/sprite_view":"/home/jay/Programming/JSProjects/primegame/client/views/sprite_view.js","./views/stage_view":"/home/jay/Programming/JSProjects/primegame/client/views/stage_view.js","ampersand-app":"/home/jay/Programming/JSProjects/primegame/client/node_modules/ampersand-app/ampersand-app.js"}],"/home/jay/Programming/JSProjects/primegame/client/models/display_object.js":[function(require,module,exports){
+},{"./models/display_object":"/home/jay/Programming/JSProjects/primegame/client/models/display_object.js","./models/hazard":"/home/jay/Programming/JSProjects/primegame/client/models/hazard.js","./models/helpee":"/home/jay/Programming/JSProjects/primegame/client/models/helpee.js","./models/hero_team":"/home/jay/Programming/JSProjects/primegame/client/models/hero_team.js","./views/sprite_view":"/home/jay/Programming/JSProjects/primegame/client/views/sprite_view.js","./views/stage_view":"/home/jay/Programming/JSProjects/primegame/client/views/stage_view.js","ampersand-app":"/home/jay/Programming/JSProjects/primegame/client/node_modules/ampersand-app/ampersand-app.js"}],"/home/jay/Programming/JSProjects/primegame/client/models/display_object.js":[function(require,module,exports){
 State = require('ampersand-state');
 Position = require('./position');
 var DisplayObject = State.extend({
-  props:{
-    hazard:{
-      type:'boolean',
-      default:false
-    }
-  },
   children:{
     position:Position
   },
 })
 
 module.exports = DisplayObject
-},{"./position":"/home/jay/Programming/JSProjects/primegame/client/models/position.js","ampersand-state":"/home/jay/Programming/JSProjects/primegame/client/node_modules/ampersand-state/ampersand-state.js"}],"/home/jay/Programming/JSProjects/primegame/client/models/helpee.js":[function(require,module,exports){
+},{"./position":"/home/jay/Programming/JSProjects/primegame/client/models/position.js","ampersand-state":"/home/jay/Programming/JSProjects/primegame/client/node_modules/ampersand-state/ampersand-state.js"}],"/home/jay/Programming/JSProjects/primegame/client/models/hazard.js":[function(require,module,exports){
+DisplayObject = require('./display_object');
+HeroTeam = require('./hero_team');
+
+Hazard = DisplayObject.extend({
+  hazard:true,
+  props:{
+    protector:'object',
+    protectorPrimes:'array'
+  },
+  protected:function(){
+    if(!this.protector || !this.protectorPrimes || this.protectorPrimes.length === 0){return false}
+    return this.protectorPrimes.some(function(prime){
+      return prime === this.protector.groupSize
+    },this)
+  }
+
+})
+
+module.exports = Hazard
+},{"./display_object":"/home/jay/Programming/JSProjects/primegame/client/models/display_object.js","./hero_team":"/home/jay/Programming/JSProjects/primegame/client/models/hero_team.js"}],"/home/jay/Programming/JSProjects/primegame/client/models/helpee.js":[function(require,module,exports){
 MoveableDisplayObject = require('./moveable_display_object');
 
 var app = require('ampersand-app');
@@ -5774,13 +5789,15 @@ StageView.prototype = {
   checkHeroContact:function(){
     this.spriteViews.forEach(function(spriteView){
       if(this.heroTeamSpriteView.model.hasHit(spriteView.model)){
+        spriteView.model.protector = this.heroTeamSpriteView.model;
         if(!this.heroTeamSpriteView.model.inHit){
           this.heroTeamSpriteView.model.inHit = true;
-          console.log('setting target to null')
-          this.heroTeamSpriteView.model.target = null
+          this.heroTeamSpriteView.model.target = null;         
         }else{
-          this.heroTeamSpriteView.model.inHit = false
+          this.heroTeamSpriteView.model.inHit = false;
         }
+      }else{
+        spriteView.model.protector = null;
       }
     },this)
   },
@@ -5792,7 +5809,7 @@ StageView.prototype = {
       if(helpee.hasHit(obj)){
         if(!helpee.inHit){
           helpee.inHit = true;
-          if(obj.hazard){
+          if(obj.hazard && !obj.protected()){
             console.log('inhazaerd')
             helpee.stuck = true;
           }

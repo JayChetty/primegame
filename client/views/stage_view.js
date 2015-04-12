@@ -91,13 +91,15 @@ StageView.prototype = {
   checkHeroContact:function(){
     this.spriteViews.forEach(function(spriteView){
       if(this.heroTeamSpriteView.model.hasHit(spriteView.model)){
+        spriteView.model.protector = this.heroTeamSpriteView.model;
         if(!this.heroTeamSpriteView.model.inHit){
           this.heroTeamSpriteView.model.inHit = true;
-          console.log('setting target to null')
-          this.heroTeamSpriteView.model.target = null
+          this.heroTeamSpriteView.model.target = null;         
         }else{
-          this.heroTeamSpriteView.model.inHit = false
+          this.heroTeamSpriteView.model.inHit = false;
         }
+      }else{
+        spriteView.model.protector = null;
       }
     },this)
   },
@@ -109,7 +111,7 @@ StageView.prototype = {
       if(helpee.hasHit(obj)){
         if(!helpee.inHit){
           helpee.inHit = true;
-          if(obj.hazard){
+          if(obj.hazard && !obj.protected()){
             console.log('inhazaerd')
             helpee.stuck = true;
           }
