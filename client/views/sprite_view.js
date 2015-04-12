@@ -1,4 +1,3 @@
-
 var SpriteView = function(spec){
   var spec = spec || {}
   this.model = spec.model;

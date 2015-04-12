@@ -15,17 +15,6 @@ var StageView = function(spec){
   this.heroTeamSpriteView = spec.heroTeamSpriteView;
   this.stage.addChild(this.heroTeamSpriteView.sprite);
 
-  //clicks change position
-  this.heroTeamSpriteView.sprite.interactive = true;
-  this.heroTeamSpriteView.sprite.mouseup = function(data){
-    this.heroTeamSpriteView.model.vertical = !this.heroTeamSpriteView.model.vertical
-    // this shouldnt be in here should be handled by view or even sprite
-    if(this.heroTeamSpriteView.model.vertical){
-      this.heroTeamSpriteView.sprite.setTexture(verticalTexture);
-    }else{
-      this.heroTeamSpriteView.sprite.setTexture(horizontalTexture);
-    }
-  }.bind(this)
 
   //go to clicks on stage
   this.stage.mousedown = function(data){

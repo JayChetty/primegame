@@ -15,10 +15,8 @@ var TeamView = AmpersandView.extend({
       this.renderWithTemplate();
       var formations = this.model.groupOptions();
       var ul = this.el.querySelector('ul.formations')
-      console.log('ul', ul)
       formations.forEach(function(formation, index){
         var li = document.createElement('li');
-        console.log('li', li)
         li.setAttribute('data-hook', 'change-formation')
         li.setAttribute('data-formation-index', index)
         li.innerHTML = formation.sizeGroup;

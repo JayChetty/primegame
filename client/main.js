@@ -5,6 +5,7 @@ var Hazard = require('./models/hazard');
 var HeroTeam = require('./models/hero_team');
 var Helpee = require('./models/helpee')
 var SpriteView = require('./views/sprite_view');
+var HeroSpriteView = require('./views/hero_sprite_view');
 var app = require('ampersand-app');
 
 window.onload = function(){
@@ -40,7 +41,7 @@ window.onload = function(){
   spriteViews.push(wallSpriteView)
 
   var targetView = new SpriteView({ model:targetModel, sprite:targetSprite });
-  var heroTeamView = new SpriteView({ model:heroTeamModel, sprite:heroTeamSprite });
+  var heroTeamView = new HeroSpriteView({ model:heroTeamModel, sprite:heroTeamSprite });
   var helpeeView = new SpriteView({ model:helpeeModel, sprite:helpeeSprite });
   //create stage
   var interactive = true;
