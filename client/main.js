@@ -22,7 +22,7 @@ window.onload = function(){
 
   var wallModel = new DisplayObject({ position:{x:200,y:100}, deflector:true})
 
-  var hazardModel = new Hazard({speed: 1, position:{x:400,y:300}, protectorPrimes:[2]})
+  var hazardModel = new Hazard({speed: 1, position:{x:400,y:300}, protectorPrimes:[3]})
 
   //and sprites
   var heroTeamSprite = new PIXI.Sprite(horizontalTexture);

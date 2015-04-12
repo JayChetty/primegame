@@ -22,6 +22,11 @@ var HeroTeam = MoveableDisplayObject.extend({
     var groupLayout = this.groupOptions()[index];
     this.groupSize = groupLayout.sizeGroup;
     this.numGroups = groupLayout.numGroups;
+    if(this.groupSize == 2){
+      this.deflector = true;
+    }else{
+      this.deflector = false;
+    }
   },
   moveTowardsTarget:function(){
     if(this.target && this.target.position){
