@@ -14,6 +14,7 @@ var HeroTeam = MoveableDisplayObject.extend({
     numGroups:'number',
   },
   initialize:function(){
+    this.deflector = true;
     var defaultGrouplayout = this.groupOptions()
     this.setGroupLayout(0);
   },

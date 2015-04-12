@@ -16,7 +16,7 @@ MoveableDisplayObject = DisplayObject.extend({
     
   },
 
-  hasHit:function(otherObject){
+  inContact:function(otherObject){
     return this.position.distanceTo(otherObject.position) < 15
   },
 

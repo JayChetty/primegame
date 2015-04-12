@@ -69,6 +69,12 @@ window.onload = function(){
 State = require('ampersand-state');
 Position = require('./position');
 var DisplayObject = State.extend({
+  props:{
+    deflector:{
+      type:'boolean',
+      default:false
+    }
+  },
   children:{
     position:Position
   },
@@ -130,6 +136,7 @@ var HeroTeam = MoveableDisplayObject.extend({
     numGroups:'number',
   },
   initialize:function(){
+    this.deflector = true;
     var defaultGrouplayout = this.groupOptions()
     this.setGroupLayout(0);
   },
@@ -189,7 +196,7 @@ MoveableDisplayObject = DisplayObject.extend({
     
   },
 
-  hasHit:function(otherObject){
+  inContact:function(otherObject){
     return this.position.distanceTo(otherObject.position) < 15
   },
 
@@ -5788,11 +5795,13 @@ StageView.prototype = {
   },
   checkHeroContact:function(){
     this.spriteViews.forEach(function(spriteView){
-      if(this.heroTeamSpriteView.model.hasHit(spriteView.model)){
+      if(this.heroTeamSpriteView.model.inContact(spriteView.model)){
         spriteView.model.protector = this.heroTeamSpriteView.model;
         if(!this.heroTeamSpriteView.model.inHit){
           this.heroTeamSpriteView.model.inHit = true;
-          this.heroTeamSpriteView.model.target = null;         
+          if(spriteView.model.deflector){
+            this.heroTeamSpriteView.model.target = null;//stop moving
+          }
         }else{
           this.heroTeamSpriteView.model.inHit = false;
         }
@@ -5804,32 +5813,34 @@ StageView.prototype = {
 
   checkHelpeeContact:function(){
     var helpee = this.helpeeSpriteView.model;
-
+    var anyContactYet = false
     var checkContact = function(obj){
-      if(helpee.hasHit(obj)){
+      if(helpee.inContact(obj)){
+        anyContact = true;
         if(!helpee.inHit){
           helpee.inHit = true;
           if(obj.hazard && !obj.protected()){
-            console.log('inhazaerd')
             helpee.stuck = true;
           }
-          if(obj.vertical){
-            this.helpeeSpriteView.model.direction = (Math.PI) - this.helpeeSpriteView.model.direction;
-          } else{
-            this.helpeeSpriteView.model.direction = (Math.PI*2) - this.helpeeSpriteView.model.direction;
+          if(obj.deflector){
+            if(obj.vertical){
+              this.helpeeSpriteView.model.direction = (Math.PI) - this.helpeeSpriteView.model.direction;
+            } else{
+              this.helpeeSpriteView.model.direction = (Math.PI*2) - this.helpeeSpriteView.model.direction;
+            }
           }
         }
       }else{
         helpee.inHit = false
       }
-    }.bind(this)
-
-    checkContact(this.heroTeamSpriteView.model)
+    }.bind(this)    
 
     this.spriteViews.forEach(function(spriteView){
       checkContact(spriteView.model)
     },this)
-
+    if(!anyContactYet){
+      checkContact(this.heroTeamSpriteView.model)
+    }
     
   }
 }
